@@ -26,7 +26,8 @@ the csv file.
 
 How To Run
 ==========
-`easy.py data.csv`
+`easy.py data.csv test.csv`
 
 This runs the training. It then reports how many of the training vectors
-were classified correctly.
+were classified correctly. Finally it reports how much of the test data was
+classified correctly.
