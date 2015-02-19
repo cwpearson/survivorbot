@@ -20,7 +20,7 @@ TEST_FILE = sys.argv[2]
 features = []
 classes = []
 
-print "reading", TRAINING_FILE
+print "Reading", TRAINING_FILE
 trainingData = CSVDOM(TRAINING_FILE)
 if trainingData.ok == False:
   print "Couldn't read training data"
