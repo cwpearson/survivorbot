@@ -32,25 +32,43 @@ if not testData.ok:
   print "Couldn't read test data"
   sys.exit(-1)
 
+# Adjust input data
+# Needed:
+#  Component-wise subtraction of the mean
+#  component-wise divison by std. dev
+# Optional:
+#  Use PCA to make sure there is no linear correlation between components
+
 assert len(testData.rows[0]) == len(trainingData.rows[0])
 
-trainingVectors = [[float(e) for e in row[3:-1]] for row in trainingData.rows]
+## Component-wise subtraction of the mean in vector entries
+
+
+trainingVectors = np.matrix([[float(e) for e in row[3:-1]] for row in trainingData.rows])
 trainingClasses = [int(row[-1]) for row in trainingData.rows]
 
-## FIXME: stretch / shift features so mean and variance are equal?
+testVectors = np.matrix([[float(e) for e in row[3:-1]] for row in testData.rows])
+testClasses = [int(row[-1]) for row in testData.rows]
 
-clf = svm.SVC(kernel='rbf')
+# Subtract out mean
+trainingVectors -= np.mean(trainingVectors, axis=0)
+testVectors -= np.mean(testVectors, axis=0)
+
+# divide out std dev
+sig = np.std(trainingVectors, axis=0)
+sig[sig == 0] = 1.0
+trainingVectors /= sig
+sig = np.std(testVectors, axis=0)
+sig[sig == 0] = 1.0
+testVectors /= sig
+
+print trainingVectors
+print testVectors
+
+clf = svm.SVC(kernel='poly', gamma=5)
 clf.fit(trainingVectors, trainingClasses)
 print "Correct training data:", clf.score(trainingVectors, trainingClasses)
 
-testVectors = [[float(e) for e in row[3:-1]] for row in testData.rows]
-testClasses = [int(row[-1]) for row in testData.rows]
+print "Correct predictions:", clf.score(testVectors, testClasses)
 
-predictions = clf.predict(testVectors)
-
-correct = 0.0
-for i in range(len(predictions)):
-  if predictions[i] == testClasses[i]:
-    correct += 1.0
-print "Correct test data:", correct / len(testClasses)
 
