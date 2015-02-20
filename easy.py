@@ -33,15 +33,15 @@ if not testData.ok:
   sys.exit(-1)
 
 # Adjust input data
-# Needed:
-#  Component-wise subtraction of the mean
-#  component-wise divison by std. dev
+# Needed: don't normalize sparse data
 # Optional:
 #  Use PCA to make sure there is no linear correlation between components
 
 assert len(testData.rows[0]) == len(trainingData.rows[0])
 
 ## Component-wise subtraction of the mean in vector entries
+
+sparseness = np.array([[0,0,0,0,0,0]])
 
 
 trainingVectors = np.matrix([[float(e) for e in row[3:-1]] for row in trainingData.rows])
@@ -51,16 +51,17 @@ testVectors = np.matrix([[float(e) for e in row[3:-1]] for row in testData.rows]
 testClasses = [int(row[-1]) for row in testData.rows]
 
 # Subtract out mean
-trainingVectors -= np.mean(trainingVectors, axis=0)
-testVectors -= np.mean(testVectors, axis=0)
-
-# divide out std dev
+mean = np.mean(trainingVectors, axis=0)
 sig = np.std(trainingVectors, axis=0)
+
+mean[sparseness == 1] = 0  # don't adjust for sparse data
+sig[sparseness == 1] = 1.0 # don't adjust for sparse data
 sig[sig == 0] = 1.0
+trainingVectors -= mean
 trainingVectors /= sig
-sig = np.std(testVectors, axis=0)
-sig[sig == 0] = 1.0
+testVectors -= mean
 testVectors /= sig
+
 
 print trainingVectors
 print testVectors
